@@ -19,7 +19,8 @@ Route::prefix('auth')->group(function () {
     });
    
 });
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot.password');
-Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
-Route::post('/send-otp', [AuthController::class, 'sendOtp'])->name('sendOtp');;
+// Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot.password');
+// Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
+Route::post('/send-otp', [AuthController::class, 'sendOtp'])->name('sendOtp');
 Route::post('/verify-otp-reset-password', [AuthController::class, 'verifyOtpAndResetPassword'])->name('verifyOtpAndResetPassword');;
+Route::get('/users', [AuthController::class, 'index']);

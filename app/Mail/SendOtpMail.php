@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Mail;
+
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -11,26 +12,24 @@ class SendOtpMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $otp;
+ public $otp, $expiry;
 
-    public function __construct($otp)
-    {
-        $this->otp = $otp;
-    }
+public function __construct($otp, $expiry)
+{
+    $this->otp = $otp;
+    $this->expiry = $expiry;
+}
 
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: 'Your OTP for Password Reset',
-        );
-    }
-
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.otp',
-        );
-    }
+public function content(): Content
+{
+    return new Content(
+        view: 'emails.otp',
+        with: [
+            'otp' => $this->otp,
+            'expiry' => $this->expiry,
+        ]
+    );
+}
 
     public function attachments(): array
     {

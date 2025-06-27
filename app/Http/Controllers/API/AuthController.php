@@ -38,7 +38,9 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => $user
+            'user' => $user,
+            'message' => 'Register successfully'
+
         ], 200);
     }
 
@@ -63,7 +65,7 @@ class AuthController extends Controller
         return response()->json([
             'token'   => $token,
             'user'    => $user,
-            'message' => 'Login successful'
+            'message' => 'Login successfully'
         ], Response::HTTP_OK);
     }
 
@@ -76,23 +78,26 @@ class AuthController extends Controller
 
     // ✅ Send OTP to Email for Forgot Password
     public function sendOtp(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ]);
+{
+    $request->validate([
+        'email' => 'required|email|exists:users,email',
+    ]);
 
-        $otp = rand(100000, 999999); // 6-digit OTP
+    $otp = rand(100000, 999999); // 6-digit OTP
 
-        DB::table('otp_codes')->updateOrInsert(
-            ['email' => $request->email],
-            ['otp' => $otp, 'created_at' => now()]
-        );
+    DB::table('otp_codes')->updateOrInsert(
+        ['email' => $request->email],
+        ['otp' => $otp, 'created_at' => now()]
+    );
 
-        // ✅ Send OTP via Email
-        Mail::to($request->email)->send(new SendOtpMail($otp));
+    //  Expiry time generate karo
+    $expiry = now()->addMinutes(10)->format('h:i A');
 
-        return response()->json(['message' => 'OTP sent to your email.'], 200);
-    }
+    //  OTP + expiry ko email me bheje
+    Mail::to($request->email)->send(new SendOtpMail($otp, $expiry));
+
+    return response()->json(['message' => 'OTP sent to your email.'], 200);
+}
 
     // ✅ Verify OTP and Reset Password
     public function verifyOtpAndResetPassword(Request $request)
@@ -118,7 +123,7 @@ class AuthController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
-        // OTP हटाएँ
+        // OTP hataye
         DB::table('otp_codes')->where('email', $request->email)->delete();
 
         return response()->json(['message' => 'Password reset successful'], 200);
