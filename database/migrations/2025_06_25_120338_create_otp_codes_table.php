@@ -13,16 +13,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('otp_codes', function (Blueprint $table) {
-          $table->id();
-        $table->string('email')->index();
-        $table->string('otp');
-        $table->timestamp();
-    });
-
+            $table->id();
+            $table->string('email')->nullable();
+            $table->string('otp');
+            $table->timestamp('expires_at')->nullable(); // ✅ यहीं गलती थी
+            $table->timestamps(); // created_at, updated_at
+        });
     }
-    /**
-     * Reverse the migrations.
-     */
+
     public function down(): void
     {
         Schema::dropIfExists('otp_codes');

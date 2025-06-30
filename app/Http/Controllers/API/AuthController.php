@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\API;
-
+use Illuminate\Support\Facades\Http;
+use Twilio\Rest\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -133,5 +134,31 @@ class AuthController extends Controller
     public function index()
     {
         return response()->json(User::all());
+    }
+     public function sendMessage(Request $request)
+    {
+        $to = $request->input('to'); // Format: +91XXXXXXXXXX
+        $message = $request->input('message');
+
+        $sid = env('TWILIO_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $twilio = new Client($sid, $token);
+
+        try {
+            $twilio->messages->create("whatsapp:$to", [
+                'from' => env('TWILIO_WHATSAPP_FROM'), // Default sandbox number
+                'body' => $message
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'WhatsApp message sent successfully!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
